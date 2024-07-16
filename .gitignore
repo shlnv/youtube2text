@@ -1,0 +1,30 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Python environment
+venv/
+lib/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Environment variables
+.env
+
+# OSx
+.DS_Store
+.Trashes
