@@ -28,3 +28,6 @@ build/
 # OSx
 .DS_Store
 .Trashes
+
+#outputs
+outputs/
