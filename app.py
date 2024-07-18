@@ -10,10 +10,9 @@ load_dotenv()
 openAIkey = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=openAIkey)
 
-# Список видео
-vids = ['https://www.youtube.com/watch?v=-RA7UStvSBI', 'https://www.youtube.com/watch?v=a18qTcWn-II']
+# video array
+vids = []
 
-# Опции для yt_dlp
 ydl_opts = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -21,17 +20,16 @@ ydl_opts = {
         'preferredcodec': 'mp3',
         'preferredquality': '192',
     }],
-    'outtmpl': './outputs/%(id)s.%(ext)s',  # Измененный шаблон для имени файла
+    'outtmpl': './outputs/%(id)s.%(ext)s',
 }
 
 def split_file(input_file, output_pattern, chunk_size=25):
-    """Разбивает аудиофайл на куски по заданному размеру."""
     try:
         probe = ffmpeg.probe(input_file)
         duration = float(probe['format']['duration'])
-        file_size = os.path.getsize(input_file) / (1024 * 1024)  # размер в МБ
+        file_size = os.path.getsize(input_file) / (1024 * 1024)  # size in mb
 
-        # Определение количества кусков
+        # how many parts
         num_chunks = int(file_size // chunk_size) + 1
 
         for i in range(num_chunks):
@@ -40,15 +38,14 @@ def split_file(input_file, output_pattern, chunk_size=25):
             output_file = f"{output_pattern}_part{i + 1}.mp3"
 
             ffmpeg.input(input_file, ss=start_time, to=end_time).output(output_file).run()
-            print(f"Создан файл: {output_file}")
+            print(f"File created: {output_file}")
 
         os.remove(input_file)
     except ffmpeg.Error as e:
-        print(f"Ошибка при разбиении файла: {e}")
+        print(f"File split error: {e}")
         raise
 
 def download_video(vid_url, attempts=5):
-    """Скачивает видео с заданного URL с повторными попытками."""
     for attempt in range(attempts):
         try:
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -57,16 +54,15 @@ def download_video(vid_url, attempts=5):
                 output_file = f"./outputs/{video_id}.mp3"
                 return output_file
         except Exception as e:
-            print(f"Ошибка при скачивании видео: {e}")
+            print(f"Download video error: {e}")
             if attempt < attempts - 1:
-                time.sleep(2)  # Задержка перед следующей попыткой
+                time.sleep(2)
             else:
                 with open("errors.txt", "a") as error_file:
-                    error_file.write(f"Не удалось скачать видео: {vid_url}\n")
+                    error_file.write(f"Couldn't download video: {vid_url}\n")
                 return None
 
 def process_videos(vids, attempts=5):
-    """Обрабатывает все видео в списке: скачивает и разбиает при необходимости."""
     for vid in vids:
         output_file = download_video(vid)
         if output_file and os.path.getsize(output_file) > 25 * 1024 * 1024:
@@ -75,16 +71,15 @@ def process_videos(vids, attempts=5):
                     split_file(output_file, output_file.replace('.mp3', ''))
                     break
                 except Exception as e:
-                    print(f"Ошибка при разбиении файла: {e}")
+                    print(f"Split file error: {e}")
                     if attempt < attempts - 1:
-                        time.sleep(2)  # Задержка перед следующей попыткой
+                        time.sleep(2)
                     else:
                         with open("errors.txt", "a") as error_file:
-                            error_file.write(f"Не удалось разбиить файл: {output_file}\n")
+                            error_file.write(f"Couldn't split file: {output_file}\n")
         transcribe_audio_files()
 
 def transcribe_audio_files():
-    """Расшифровывает все аудиофайлы в папке outputs и сохраняет их в текстовые файлы."""
     for filename in os.listdir('./outputs'):
         if filename.endswith(".mp3"):
             audio_file_path = os.path.join('./outputs', filename)
@@ -99,7 +94,7 @@ def transcribe_audio_files():
                 
             with open(transcript_file_path, "w", encoding="utf-8") as text_file:
                 text_file.write(transcript)
-            print(f"Создан файл расшифровки: {transcript_file_path}")
+            print(f"Transcript file creeated: {transcript_file_path}")
 
 process_videos(vids)
-print("Завершено")
+print("Finished")
