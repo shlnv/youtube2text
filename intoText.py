@@ -15,8 +15,5 @@ transcript = client.audio.transcriptions.create(
     response_format="text"
 )
 
-# Сохранение текста в файл с указанием кодировки UTF-8
-with open("transcript.txt", "w", encoding="utf-8") as text_file:
+with open("outputs/transcript.txt", "w", encoding="utf-8") as text_file:
     text_file.write(transcript)
-
-print("Транскрипт сохранен в файл transcript.txt")
