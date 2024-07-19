@@ -2,7 +2,7 @@ import yt_dlp
 import os
 import re
 
-def download_auto_subtitles(video_urls, lang='ru', output_dir='.'):
+def downloadSubs(vids, lang='en', output_dir='./subs'):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
@@ -13,7 +13,7 @@ def download_auto_subtitles(video_urls, lang='ru', output_dir='.'):
         'outtmpl': f'{output_dir}/%(title)s.%(ext)s',
     }
 
-    for video_url in video_urls:
+    for video_url in vids:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(video_url, download=False)
             if 'automatic_captions' in info_dict and lang in info_dict['automatic_captions']:
@@ -46,9 +46,3 @@ def convert_vtt_to_txt(vtt_file, txt_file):
     except Exception as e:
         print(f"Error converting {vtt_file} to {txt_file}: {e}")
 
-video_urls = [
-    'https://www.youtube.com/watch?v=pGxD08MSklA',
-    'https://www.youtube.com/watch?v=k86jwgxyMWw',
-    'https://www.youtube.com/watch?v=yBHwJBxSEPU'
-]
-download_auto_subtitles(video_urls, lang='ru', output_dir='subtitles')
